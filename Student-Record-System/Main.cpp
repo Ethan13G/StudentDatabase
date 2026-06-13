@@ -19,7 +19,7 @@ int main()
 	do
 	{
 		cout << "\n===== STUDENT DATABASE =====\n";
-		cout << "1. Display\n";
+		cout << "1. Display Students\n";
 		cout << "2. Search by Course\n";
 		cout << "3. Assignment Averages\n";
 		cout << "4. Hardest Assignment\n";
