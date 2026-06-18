@@ -1,8 +1,9 @@
-// Lab06 - Student Record System (Enhanced)
+// Lab07 - Student Database: Linked List
 // Implementation file - Student.cpp
 // Ethan Gee
 
 #include "Student.h"
+#include <iostream>
 #include <fstream>
 #include <iomanip>
 
