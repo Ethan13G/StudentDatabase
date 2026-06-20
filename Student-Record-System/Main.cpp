@@ -45,8 +45,8 @@ int main()
         case 7: addStudent(head); break;
         case 8: atRiskStudents(head);  break;
         case 9: saveStudents(head); break;
-		case 10: cout << "Exiting program..." << endl; break;
-		default: cout << "Invalid choice. Please enter a number between 1 and 10." << endl; break;
+		case 10: cout << "\nExiting program..." << endl; break;
+		default: cout << "\nInvalid choice. Please enter a number between 1 and 10." << endl; break;
         }
 
     } while (choice != 10);

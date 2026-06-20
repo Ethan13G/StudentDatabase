@@ -50,6 +50,8 @@ void loadStudents(StudentNode*& head)
 // ================ DISPLAY STUDENTS ================
 void displayStudents(StudentNode* head)
 {
+    cout << fixed << setprecision(1); // Added this for output formatting
+
     cout << "\n"
         << setw(8) << "ID"
         << setw(15) << "LName"
@@ -90,9 +92,7 @@ void displayStudents(StudentNode* head)
 void calculateAverage(Student* s)
 {
     if (s == nullptr)
-    {
         return;
-    }
 
     double total = 0;
 
@@ -105,21 +105,24 @@ void calculateAverage(Student* s)
 }
 
 // Calculate averages for all students
-void calculateAllAverages(Student students[], int count)
+void calculateAllAverages(StudentNode* head)
 {
-    for (int i = 0; i < count; i++)
+    StudentNode* current = head;
+
+    while (current != nullptr)
     {
-        calculateAverage(&students[i]);
+        calculateAverage(&current->data);
+        current = current->next;
     }
 }
 
 // Search for students taking a specfic course
-void searchByCourse(Student students[], int count)
+void searchByCourse(StudentNode* head)
 {
     string course;
     bool found = false;
 
-    if (count == 0)
+    if (head == nullptr)
     {
         cout << "No students loaded.\n";
         return;
@@ -130,20 +133,24 @@ void searchByCourse(Student students[], int count)
 
     cout << "\nStudents enrolled in " << course << ":\n";
 
-    for (int i = 0; i < count; i++)
+    StudentNode* current = head;
+
+    while (current != nullptr)
     {
-        for (int j = 0; j < NUM_COURSES; j++)
+        for (int i = 0; i < NUM_COURSES; i++)
         {
-            if (students[i].courses[j] == course)
+            if (current->data.courses[i] == course)
             {
-                cout << students[i].id << " " 
-                    << students[i].firstName << " " 
-                    << students[i].lastName << endl;
+                cout << current->data.id << " "
+                    << current->data.firstName << " "
+                    << current->data.lastName << endl;
 
                 found = true;
-                break; 
+                break;
             }
         }
+
+        current = current->next;
     }
 
     if (!found)
@@ -153,28 +160,30 @@ void searchByCourse(Student students[], int count)
 }
 
 // Show average for each assignment
-void showAssignmentAverage(Student students[], int count)
+void showAssignmentAverage(StudentNode* head)
 {
-    double total;
-
-    if (count == 0)
+    if (head == nullptr)
     {
         cout << "No students loaded.\n";
         return;
     }
 
     cout << fixed << setprecision(4);
-
     cout << "\nAssignment Averages\n";
     cout << string(19, '-') << endl;
 
     for (int assignment = 0; assignment < NUM_ASSIGNMENTS; assignment++)
     {
-        total = 0;
+        double total = 0;
+        int count = 0;
 
-        for (int student = 0; student < count; student++)
+        StudentNode* current = head;
+
+        while (current != nullptr)
         {
-            total += students[student].assignments[assignment];
+            total += current->data.assignments[assignment];
+            count++;
+            current = current->next;
         }
 
         cout << "A" << assignment + 1 << ": "
@@ -183,26 +192,31 @@ void showAssignmentAverage(Student students[], int count)
 }
 
 // Show the hardest assignment
-void showHardestAssignment(Student students[], int count)
+void showHardestAssignment(StudentNode* head)
 {
-    double lowestAverage = 0;
-    int hardestAssignment = 0;
+    cout << fixed << setprecision(4);
 
-    if (count == 0)
+    if (head == nullptr)
     {
         cout << "No students loaded.\n";
         return;
     }
 
-    cout << fixed << setprecision(4);
+    double lowestAverage = 0;
+    int hardestAssignment = 0;
 
     for (int assignment = 0; assignment < NUM_ASSIGNMENTS; assignment++)
     {
         double total = 0;
+        int count = 0;
 
-        for (int student = 0; student < count; student++)
+        StudentNode* current = head;
+
+        while (current != nullptr)
         {
-            total += students[student].assignments[assignment];
+            total += current->data.assignments[assignment];
+            count++;
+            current = current->next;
         }
 
         double average = total / count;
@@ -220,12 +234,12 @@ void showHardestAssignment(Student students[], int count)
 }
 
 // Show course enrollment numbers
-void courseEnrollment(Student students[], int count)
+void courseEnrollment(StudentNode* head)
 {
     string countedCourses[STUDENT_MAX * NUM_COURSES];
-    int uniqueCount = 0; // Number of unique courses currently stored in countedCourses
+    int uniqueCount = 0;
 
-    if (count == 0)
+    if (head == nullptr)
     {
         cout << "No students loaded.\n";
         return;
@@ -234,115 +248,135 @@ void courseEnrollment(Student students[], int count)
     cout << "\nCourse Enrollment\n";
     cout << string(17, '-') << endl;
 
-    for (int i = 0; i < count; i++) // Check every course for every student
+    StudentNode* current = head;
+
+    // Traverse linked list
+    while (current != nullptr)
     {
-        for (int j = 0; j < NUM_COURSES; j++)
+        for (int i = 0; i < NUM_COURSES; i++)
         {
-            string currentCourse = students[i].courses[j];
+            string currentCourse = current->data.courses[i];
 
-            bool alreadyCounted = false; // Assume this course has not been processed yet
+            bool alreadyCounted = false;
 
-			for (int k = 0; k < uniqueCount; k++) // Check if this course has already been processed
+            // Check if course was already processed
+            for (int j = 0; j < uniqueCount; j++)
             {
-                if (countedCourses[k] == currentCourse)
+                if (countedCourses[j] == currentCourse)
                 {
                     alreadyCounted = true;
                     break;
                 }
             }
 
-            if (!alreadyCounted) // New course found - counts how many students are enrolled in it
+            if (!alreadyCounted)
             {
                 int enrollment = 0;
 
-                for (int s = 0; s < count; s++)
+                // Count how many students are in this course
+                StudentNode* temp = head;
+
+                while (temp != nullptr)
                 {
-                    for (int c = 0; c < NUM_COURSES; c++)
+                    for (int k = 0; k < NUM_COURSES; k++)
                     {
-                        if (students[s].courses[c] == currentCourse)
+                        if (temp->data.courses[k] == currentCourse)
                         {
                             enrollment++;
-                            break; // count each student only once
+                            break; // Count student once
                         }
                     }
+                    temp = temp->next;
                 }
 
-                cout << currentCourse << ": "
-                    << enrollment << endl;
+                cout << currentCourse << ": " << enrollment << endl;
 
                 countedCourses[uniqueCount] = currentCourse;
                 uniqueCount++;
             }
         }
+
+        current = current->next;
     }
 }
 
 // Sort students by average grade
-void sortByAverage(Student students[], int count)
+void sortByAverage(StudentNode* head)
 {
-    if (count == 0)
+    if (head == nullptr)
     {
         cout << "No students loaded.\n";
         return;
     }
 
-    for (int i = 0; i < count - 1; i++)
+    bool swapped;
+
+    do
     {
-        for (int j = 0; j < count - 1 - i; j++)
+        swapped = false;
+
+        StudentNode* current = head;
+
+        while (current->next != nullptr)
         {
-            if (students[j].average < students[j + 1].average)
+            if (current->data.average < current->next->data.average)
             {
-                Student temp = students[j];
-                students[j] = students[j + 1];
-                students[j + 1] = temp;
+                // Swap Student data (not nodes)
+                Student temp = current->data;
+                current->data = current->next->data;
+                current->next->data = temp;
+
+                swapped = true;
             }
+
+            current = current->next;
         }
-    }
+
+    } while (swapped);
 }
 
 // Add a new student
-void addStudent(Student students[], int& count)
+void addStudent(StudentNode*& head)
 {
-    if (count >= STUDENT_MAX)
-    {
-        cout << "Student database is full.\n";
-        return;
-    }
+    StudentNode* newNode = new StudentNode;
+
+    newNode->next = nullptr;
 
     cout << "\nEnter first name: ";
-    cin >> students[count].firstName;
+    cin >> newNode->data.firstName;
 
     cout << "Enter last name: ";
-    cin >> students[count].lastName;
+    cin >> newNode->data.lastName;
 
     cout << "Enter ID: ";
-    cin >> students[count].id;
+    cin >> newNode->data.id;
 
     for (int i = 0; i < NUM_ASSIGNMENTS; i++)
     {
         cout << "Enter Assignment " << i + 1 << ": ";
-        cin >> students[count].assignments[i];
+        cin >> newNode->data.assignments[i];
     }
 
     for (int i = 0; i < NUM_COURSES; i++)
     {
         cout << "Enter Course " << i + 1 << ": ";
-        cin >> students[count].courses[i];
+        cin >> newNode->data.courses[i];
     }
 
-    calculateAverage(&students[count]);
+    calculateAverage(&newNode->data);
 
-    count++;
+    newNode->next = head;
+    head = newNode;
 
     cout << "Student added successfully.\n";
 }
 
 // Show at-risk students (at least one assignment below 50 and have an average between 50 and 59)
-void atRiskStudents(Student students[], int count)
+void atRiskStudents(StudentNode* head)
 {
     bool found = false;
 
-    if (count == 0)
+    if (head == nullptr)
     {
         cout << "No students loaded.\n";
         return;
@@ -351,29 +385,35 @@ void atRiskStudents(Student students[], int count)
     cout << "\nAt-Risk Students\n";
     cout << string(16, '-') << endl;
 
-    for (int i = 0; i < count; i++)
+    StudentNode* current = head;
+
+    while (current != nullptr)
     {
         bool hasLowAssignment = false;
 
-        for (int j = 0; j < NUM_ASSIGNMENTS; j++)  // Check if any assignment is below 50
+		// Check if any assignment is below 50
+        for (int i = 0; i < NUM_ASSIGNMENTS; i++)
         {
-            if (students[i].assignments[j] < 50)
+            if (current->data.assignments[i] < 50)
             {
                 hasLowAssignment = true;
                 break;
             }
         }
 
-        if (hasLowAssignment &&  // Check both conditions
-            students[i].average >= 50 &&
-            students[i].average <= 59)
+		// Check both conditions for at-risk status
+        if (hasLowAssignment &&
+            current->data.average >= 50 &&
+            current->data.average <= 59)
         {
-            cout << students[i].id << " "
-                << students[i].firstName << " "
-                << students[i].lastName << endl;
+            cout << current->data.id << " "
+                << current->data.firstName << " "
+                << current->data.lastName << endl;
 
             found = true;
         }
+
+        current = current->next;
     }
 
     if (!found)
@@ -383,7 +423,7 @@ void atRiskStudents(Student students[], int count)
 }
 
 // Save students to file
-void saveStudents(Student students[], int count)
+void saveStudents(StudentNode* head)
 {
     ofstream fout("Students90.txt");
 
@@ -393,28 +433,47 @@ void saveStudents(Student students[], int count)
         return;
     }
 
-    for (int i = 0; i < count; i++)
-    {
-        fout << students[i].firstName << " "
-            << students[i].lastName << " "
-            << students[i].id << " ";
+    StudentNode* current = head;
 
-        for (int j = 0; j < NUM_ASSIGNMENTS; j++)
+    while (current != nullptr)
+    {
+        fout << current->data.firstName << " "
+            << current->data.lastName << " "
+            << current->data.id << " ";
+
+        for (int i = 0; i < NUM_ASSIGNMENTS; i++)
         {
-            fout << students[i].assignments[j] << " ";
+            fout << current->data.assignments[i] << " ";
         }
 
-        fout << students[i].average << " ";
+        fout << current->data.average << " ";
 
-        for (int j = 0; j < NUM_COURSES; j++)
+        for (int i = 0; i < NUM_COURSES; i++)
         {
-            fout << students[i].courses[j] << " ";
+            fout << current->data.courses[i] << " ";
         }
 
         fout << endl;
+
+        current = current->next;
     }
 
     fout.close();
 
     cout << "Students saved successfully.\n";
+}
+
+// Delete the linked list and free memory
+void deleteList(StudentNode*& head)
+{
+    StudentNode* temp;
+
+    while (head != nullptr)
+    {
+        temp = head;        
+        head = head->next;  
+        delete temp;        
+    }
+
+    head = nullptr; 
 }
